@@ -114,26 +114,46 @@
       return;
     }
 
-    // Simulate submission
+    // Submit to Formspree
     const btnText = submitBtn.querySelector('.btn-text');
     submitBtn.disabled = true;
     if (btnText) btnText.textContent = 'Sending…';
 
-    setTimeout(() => {
+    const data = new FormData(form);
+
+    fetch('https://formspree.io/f/mrevznbd', {
+      method: 'POST',
+      body: data,
+      headers: { 'Accept': 'application/json' }
+    })
+    .then(response => {
       submitBtn.disabled = false;
       if (btnText) btnText.textContent = 'Send My Request';
-      form.reset();
-
-      if (success) {
-        success.textContent = '✓ Your request has been received! We\'ll get back to you within 2 hours.';
-        success.classList.add('show');
-        success.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-        setTimeout(() => {
-          success.classList.remove('show');
-        }, 6000);
+      if (response.ok) {
+        form.reset();
+        if (success) {
+          success.textContent = '✓ Your request has been received! We\'ll get back to you within 2 hours.';
+          success.classList.add('show');
+          success.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          setTimeout(() => { success.classList.remove('show'); }, 6000);
+        }
+      } else {
+        if (success) {
+          success.textContent = '✗ Something went wrong. Please call us at 437-776-0989.';
+          success.classList.add('show');
+          setTimeout(() => { success.classList.remove('show'); }, 6000);
+        }
       }
-    }, 1400);
+    })
+    .catch(() => {
+      submitBtn.disabled = false;
+      if (btnText) btnText.textContent = 'Send My Request';
+      if (success) {
+        success.textContent = '✗ Something went wrong. Please call us at 437-776-0989.';
+        success.classList.add('show');
+        setTimeout(() => { success.classList.remove('show'); }, 6000);
+      }
+    });
   });
 
   // Live validation clear on input
